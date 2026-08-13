@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fresh Laundry · Panel</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root{--bg:#ffffff;--bg2:#f5f5f3;--bg3:#ebebea;--text:#1a1a18;--text2:#6b6b68;--text3:#b4b2a9;--border:#e0e0dc;--blue:#185FA5;--blue-bg:#E6F1FB;--green:#0F6E56;--green-bg:#E1F5EE;--red:#A32D2D;--red-bg:#FCEBEB;--yellow:#7A5C00;--yellow-bg:#FEF9E7;--radius:8px;--radius-lg:12px;--font:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+@media(prefers-color-scheme:dark){:root{--bg:#1c1c1a;--bg2:#252523;--bg3:#2a2a28;--text:#f0f0ee;--text2:#9a9a96;--text3:#4a4a44;--border:#2e2e2c;--blue-bg:#1d3a6e33;--green-bg:#06503533;--red-bg:#4a0f0f33;--yellow-bg:#3a250033}}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--bg2);color:var(--text);min-height:100vh}
+
+/* LOGIN */
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1.5rem}
+.login-card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:2.5rem 2rem;width:100%;max-width:360px;box-shadow:0 4px 24px rgba(0,0,0,.08)}
+.login-logo{font-size:13px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--text2);margin-bottom:4px}
+.login-title{font-size:22px;font-weight:600;margin-bottom:2rem;color:var(--text)}
+.login-label{display:block;font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.login-input{width:100%;padding:10px 12px;border:0.5px solid var(--border);border-radius:var(--radius);font-size:14px;font-family:var(--font);background:var(--bg2);color:var(--text);margin-bottom:1rem;outline:none;transition:border-color .15s}
+.login-input:focus{border-color:var(--blue)}
+.login-btn{width:100%;padding:11px;font-size:14px;font-weight:500;cursor:pointer;border:none;border-radius:var(--radius);background:var(--blue);color:#fff;font-family:var(--font);transition:opacity .15s}
+.login-btn:hover{opacity:.88}
+.login-error{font-size:12px;color:var(--red);margin-top:10px;text-align:center}
+
+/* APP */
+.app{max-width:720px;margin:0 auto;padding:1.5rem 1rem 4rem}
+.app-header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:1.5rem}
+.brand-sub{font-size:10px;color:var(--text3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:3px}
+.brand-name{font-size:22px;font-weight:600}
+.logout-btn{font-size:11px;color:var(--text2);background:none;border:0.5px solid var(--border);border-radius:var(--radius);padding:5px 10px;cursor:pointer;font-family:var(--font)}
+
+/* TABS */
+.tabs{display:flex;border-bottom:0.5px solid var(--border);margin-bottom:1.25rem;gap:0}
+.tab{background:none;border:none;border-bottom:2px solid transparent;padding:8px 16px;font-size:13px;cursor:pointer;color:var(--text2);font-family:var(--font);transition:all .15s}
+.tab.active{color:var(--text);border-bottom-color:var(--text);font-weight:500}
+
+/* LOC + WINDOW */
+.controls{display:flex;gap:8px;align-items:center;margin-bottom:1.25rem;flex-wrap:wrap}
+.loc-btn{background:var(--bg2);border:0.5px solid var(--border);padding:6px 14px;font-size:12px;cursor:pointer;color:var(--text2);border-radius:var(--radius);font-family:var(--font);transition:all .15s;font-weight:500}
+.wbtn{background:transparent;border:0.5px solid var(--border);padding:4px 10px;font-size:11px;cursor:pointer;color:var(--text2);border-radius:var(--radius);font-family:var(--font);font-weight:500;transition:all .15s}
+.wbtn.active,.loc-btn.active{color:#fff;border-color:transparent}
+.sep{width:0.5px;height:18px;background:var(--border);flex-shrink:0}
+
+/* TREND BANNER */
+.trend-banner{border-radius:var(--radius);padding:10px 14px;margin-bottom:10px;border:1.5px solid}
+.trend-label{font-size:14px;font-weight:700;margin-bottom:3px}
+.trend-desc{font-size:11px;opacity:.85}
+
+/* MA ROW */
+.ma-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px}
+.ma-card{flex:1;min-width:100px;background:var(--bg2);border-radius:var(--radius);padding:8px 12px}
+.ma-label{font-size:10px;color:var(--text2);margin-bottom:3px;display:flex;justify-content:space-between;align-items:center}
+.ma-val{font-size:15px;font-weight:500}
+.itip{background:none;border:none;cursor:pointer;font-size:12px;color:var(--text3);padding:0;line-height:1}
+
+/* DIVIDER + SECTION TITLE */
+.divider{height:0.5px;background:var(--border);margin:18px 0}
+.section-title{font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;font-weight:500}
+
+/* PERIOD BAR */
+.period-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.pill{display:inline-flex;align-items:center;gap:6px;background:var(--bg2);border-radius:var(--radius);padding:5px 10px;font-size:11px}
+.pill-dot{width:7px;height:7px;border-radius:50%;display:inline-block;flex-shrink:0}
+.pill-label{font-weight:500;color:var(--text)}
+.pill-range{color:var(--text2)}
+.pill-dias{background:var(--bg);border:0.5px solid var(--border);border-radius:3px;padding:1px 5px;color:var(--text2)}
+
+/* METRIC CARDS */
+.metrics{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px}
+.metric{flex:1;min-width:115px;padding:.875rem;background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius-lg);border-top:3px solid}
+.metric-label{font-size:11px;color:var(--text2);margin-bottom:7px;text-transform:uppercase;letter-spacing:.04em}
+.metric-value{font-size:21px;font-weight:500;line-height:1;margin-bottom:4px}
+.metric-prev{display:flex;align-items:center;font-size:11px;color:var(--text2)}
+.delta{font-size:10px;font-weight:500;padding:1px 5px;border-radius:3px;margin-left:5px}
+.up{background:#E1F5EE;color:#085041}
+.dn{background:#FCEBEB;color:#791F1F}
+
+/* KPI CARDS */
+.kpi-grid{display:flex;gap:8px;flex-wrap:wrap}
+.kpi{flex:1;min-width:120px;padding:.875rem 1rem;background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius-lg);border-top:3px solid}
+.kpi-label{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.04em}
+.kpi-value{font-size:22px;font-weight:500;line-height:1;margin-bottom:4px}
+.kpi-value.big{font-size:26px}
+.kpi-sub{font-size:11px;color:var(--text2)}
+
+/* DIAG */
+.diag{border-radius:var(--radius);padding:8px 12px;font-size:12px;font-weight:500;margin-bottom:10px}
+
+/* CHART CARD */
+.chart-card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem;margin-top:18px}
+.chart-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px}
+.chart-title{font-size:12px;color:var(--text2)}
+.chart-tabs{display:flex;gap:4px;flex-wrap:wrap}
+.ctab{background:transparent;border:0.5px solid var(--border);padding:4px 10px;font-size:11px;cursor:pointer;color:var(--text2);border-radius:var(--radius);font-family:var(--font)}
+.ctab.active{background:var(--bg2);color:var(--text);font-weight:500}
+.chart-legend{display:flex;gap:14px;margin-bottom:8px;font-size:11px;color:var(--text2)}
+.legend-item{display:flex;align-items:center;gap:4px}
+.legend-dot{width:10px;height:10px;border-radius:2px}
+.legend-line{width:12px;height:2px}
+.chart-wrap{position:relative;height:210px}
+
+/* TABLE */
+.table-wrap{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius-lg);overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{padding:9px 12px;text-align:left;font-weight:500;font-size:11px;color:var(--text2);border-bottom:0.5px solid var(--border)}
+td{padding:8px 12px;border-bottom:0.5px solid var(--border);color:var(--text)}
+tr:last-child td{border-bottom:none}
+
+/* FORM */
+.form-card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem}
+.form-label{font-size:11px;color:var(--text2);display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em}
+.form-input{width:100%;padding:8px 10px;border:0.5px solid var(--border);border-radius:var(--radius);font-size:13px;font-family:var(--font);background:var(--bg2);color:var(--text);outline:none}
+.form-input:disabled{opacity:.35}
+.form-section{margin-bottom:14px;padding:1rem;background:var(--bg2);border-radius:var(--radius)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.form-ticket{margin-top:10px;padding:6px 10px;border-radius:var(--radius);font-size:12px}
+.submit-btn{width:100%;padding:10px;font-size:14px;cursor:pointer;border:0.5px solid var(--border);border-radius:var(--radius);font-family:var(--font);background:var(--bg);color:var(--text);transition:all .2s;font-weight:500}
+.submit-btn.ok{background:#E1F5EE;border-color:#1D9E75;color:#085041}
+.form-note{font-size:11px;color:var(--text2);margin-top:5px}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;z-index:999;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,.4)}
+.modal{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:20px;max-width:340px;width:100%;line-height:1.65;box-shadow:0 8px 40px rgba(0,0,0,.2)}
+.modal-title{font-weight:600;font-size:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.modal-close{background:none;border:none;cursor:pointer;font-size:18px;color:var(--text2);line-height:1}
+.modal-text{font-size:13px;color:var(--text2)}
+
+/* MAYO BANNER */
+.mayo-banner{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:1rem 1.25rem;margin-bottom:1.25rem;display:flex;gap:16px;flex-wrap:wrap}
+.mayo-item{flex:1;min-width:140px}
+.mayo-sub{font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.mayo-val{font-size:20px;font-weight:500}
+</style>
+</head>
+<body>
+
+<div id="login-screen">
+  <div class="login-wrap">
+    <div class="login-card">
+      <div class="login-logo">Fresh Laundry</div>
+      <div class="login-title">Panel de ventas</div>
+      <label class="login-label">Contraseña</label>
+      <input class="login-input" type="password" id="pwd-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+      <button class="login-btn" onclick="doLogin()">Ingresar</button>
+      <div class="login-error" id="login-error"></div>
+    </div>
+  </div>
+</div>
+
+<div id="app-screen" style="display:none">
+  <div class="app">
+    <div class="app-header">
+      <div>
+        <div class="brand-sub">Jomato S.A.S. · 2026</div>
+        <div class="brand-name">Fresh Laundry</div>
+      </div>
+      <button class="logout-btn" onclick="logout()">Cerrar sesión</button>
+    </div>
+    <div id="app-content"></div>
+  </div>
+</div>
+
+<div id="modal" style="display:none" class="modal-overlay" onclick="closeModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title"><span id="modal-title"></span><button class="modal-close" onclick="closeModal()">×</button></div>
+    <div class="modal-text" id="modal-text"></div>
+  </div>
+</div>
+
+<script>
+// ── CONTRASEÑA ─────────────────────────────────────────────────────
+// Cambia esto por tu contraseña real
+const PASSWORD = 'fresh2026';
+
+function doLogin(){
+  const val = document.getElementById('pwd-input').value;
+  if(val === PASSWORD){
+    localStorage.setItem('fl_auth','1');
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app-screen').style.display='block';
+    initApp();
+  } else {
+    document.getElementById('login-error').textContent = 'Contraseña incorrecta';
+    document.getElementById('pwd-input').value='';
+  }
+}
+function logout(){
+  localStorage.removeItem('fl_auth');
+  location.reload();
+}
+window.addEventListener('load',()=>{
+  if(localStorage.getItem('fl_auth')==='1'){
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app-screen').style.display='block';
+    initApp();
+  }
+});
+
+// ── TIPS ────────────────────────────────────────────────────────────
+const TIPS={
+  ma15:{t:'MA 15 días',d:'Media de los últimos 15 días activos. Reacciona rápido a cambios recientes. Cuando cruza por encima de la MA60, señal de alza.'},
+  ma60:{t:'MA 60 días',d:'Media de los últimos 60 días activos. Representa la tendencia de largo plazo del negocio.'},
+  pend:{t:'Pendiente / día',d:'Cuánto sube o baja el promedio por cada día activo adicional, calculado con regresión lineal sobre los últimos 20 días activos.'},
+  r2:{t:'Fuerza de señal (R²)',d:'Qué tan confiable es la señal de tendencia. Más del 60% = señal fuerte. Menos del 30% = hay mucho ruido y la señal no es concluyente.'},
+  consist:{t:'Índice de consistencia',d:'Porcentaje de días activos donde vendiste por encima del promedio del período. Más del 50% = negocio sano. Menos del 50% = demasiados días malos arrastrando el promedio.'},
+  recup_hist:{t:'Recuperación histórica',d:'Días promedio que tarda el negocio en volver al promedio después de un día que cayó más del 20%. Cuanto menor, mejor.'},
+  recup_rec:{t:'Últimas 5 recuperaciones',d:'Promedio de las últimas 5 recuperaciones. Si es menor al histórico, los valles son cada vez más cortos — señal positiva.'},
+  ticket:{t:'Ticket promedio',d:'Total ventas ÷ total servicios del período. No es promedio de tickets diarios, lo cual distorsionaría los resultados.'},
+  servicios:{t:'Servicios / día',d:'Cuántos servicios atiendes por día activo. Si sube, estás atrayendo más clientes. Si baja, el volumen decrece aunque el ticket suba.'},
+  diasbuenos:{t:'Días buenos / semana',d:'Días por semana donde superaste el umbral objetivo. Subir este número significa que el piso del negocio está subiendo — más valioso que un pico aislado.'},
+};
+function showTip(k){
+  document.getElementById('modal-title').textContent=TIPS[k].t;
+  document.getElementById('modal-text').textContent=TIPS[k].d;
+  document.getElementById('modal').style.display='flex';
+}
+function closeModal(){document.getElementById('modal').style.display='none';}
+
+// ── DATOS ───────────────────────────────────────────────────────────
+const L1=[{"date":"2026-01-15","l1":25000,"t1":1},{"date":"2026-01-16","l1":70000,"t1":2},{"date":"2026-01-17","l1":57000,"t1":2},{"date":"2026-01-19","l1":25000,"t1":1},{"date":"2026-01-20","l1":107000,"t1":3},{"date":"2026-01-21","l1":51000,"t1":2},{"date":"2026-01-22","l1":82000,"t1":3},{"date":"2026-01-23","l1":173200,"t1":4},{"date":"2026-01-24","l1":32000,"t1":1},{"date":"2026-01-25","l1":57000,"t1":2},{"date":"2026-01-26","l1":32000,"t1":1},{"date":"2026-01-27","l1":146000,"t1":5},{"date":"2026-01-28","l1":214000,"t1":6},{"date":"2026-01-29","l1":219000,"t1":5},{"date":"2026-01-30","l1":101000,"t1":3},{"date":"2026-01-31","l1":112000,"t1":4},{"date":"2026-02-01","l1":193000,"t1":7},{"date":"2026-02-02","l1":157000,"t1":5},{"date":"2026-02-03","l1":210000,"t1":6},{"date":"2026-02-04","l1":215000,"t1":6},{"date":"2026-02-05","l1":173000,"t1":6},{"date":"2026-02-06","l1":215100,"t1":6},{"date":"2026-02-07","l1":328920,"t1":9},{"date":"2026-02-08","l1":107000,"t1":4},{"date":"2026-02-09","l1":196000,"t1":5},{"date":"2026-02-10","l1":196000,"t1":5},{"date":"2026-02-11","l1":97250,"t1":3},{"date":"2026-02-12","l1":57000,"t1":2},{"date":"2026-02-13","l1":132000,"t1":3},{"date":"2026-02-14","l1":73000,"t1":3},{"date":"2026-02-15","l1":114000,"t1":3},{"date":"2026-02-16","l1":294200,"t1":7},{"date":"2026-02-17","l1":131000,"t1":5},{"date":"2026-02-18","l1":303000,"t1":7},{"date":"2026-02-19","l1":54000,"t1":3},{"date":"2026-02-20","l1":126000,"t1":4},{"date":"2026-02-21","l1":441000,"t1":11},{"date":"2026-02-22","l1":133000,"t1":3},{"date":"2026-02-23","l1":326000,"t1":8},{"date":"2026-02-24","l1":622900,"t1":17},{"date":"2026-02-25","l1":176000,"t1":5},{"date":"2026-02-26","l1":151000,"t1":4},{"date":"2026-02-27","l1":89000,"t1":3},{"date":"2026-02-28","l1":139000,"t1":4},{"date":"2026-03-01","l1":241000,"t1":7},{"date":"2026-03-02","l1":475000,"t1":11},{"date":"2026-03-03","l1":175750,"t1":5},{"date":"2026-03-04","l1":213400,"t1":7},{"date":"2026-03-05","l1":332000,"t1":6},{"date":"2026-03-06","l1":113000,"t1":4},{"date":"2026-03-07","l1":360000,"t1":10},{"date":"2026-03-08","l1":114000,"t1":4},{"date":"2026-03-09","l1":450520,"t1":11},{"date":"2026-03-10","l1":297000,"t1":9},{"date":"2026-03-11","l1":185000,"t1":4},{"date":"2026-03-12","l1":171000,"t1":5},{"date":"2026-03-13","l1":221000,"t1":6},{"date":"2026-03-14","l1":316000,"t1":10},{"date":"2026-03-15","l1":316000,"t1":8},{"date":"2026-03-16","l1":546000,"t1":14},{"date":"2026-03-17","l1":164000,"t1":4},{"date":"2026-03-18","l1":548200,"t1":10},{"date":"2026-03-19","l1":389080,"t1":10},{"date":"2026-03-20","l1":172000,"t1":6},{"date":"2026-03-21","l1":426000,"t1":9},{"date":"2026-03-22","l1":82000,"t1":3},{"date":"2026-03-23","l1":89000,"t1":3},{"date":"2026-03-24","l1":290000,"t1":9},{"date":"2026-03-25","l1":298000,"t1":9},{"date":"2026-03-26","l1":393700,"t1":10},{"date":"2026-03-27","l1":416100,"t1":6},{"date":"2026-03-28","l1":275200,"t1":6},{"date":"2026-03-29","l1":138000,"t1":4},{"date":"2026-03-30","l1":545000,"t1":11},{"date":"2026-03-31","l1":119000,"t1":4},{"date":"2026-04-01","l1":212000,"t1":7},{"date":"2026-04-02","l1":346620,"t1":6},{"date":"2026-04-04","l1":402200,"t1":10},{"date":"2026-04-05","l1":271000,"t1":6},{"date":"2026-04-06","l1":404900,"t1":12},{"date":"2026-04-07","l1":180000,"t1":5},{"date":"2026-04-08","l1":608300,"t1":9},{"date":"2026-04-09","l1":204000,"t1":7},{"date":"2026-04-10","l1":168000,"t1":4},{"date":"2026-04-11","l1":137000,"t1":3},{"date":"2026-04-12","l1":131000,"t1":4},{"date":"2026-04-13","l1":467900,"t1":9},{"date":"2026-04-14","l1":312600,"t1":8},{"date":"2026-04-15","l1":64000,"t1":3},{"date":"2026-04-16","l1":247000,"t1":7},{"date":"2026-04-17","l1":180000,"t1":3},{"date":"2026-04-18","l1":241000,"t1":7},{"date":"2026-04-19","l1":345000,"t1":10},{"date":"2026-04-20","l1":498000,"t1":9},{"date":"2026-04-21","l1":312200,"t1":9},{"date":"2026-04-22","l1":475000,"t1":8},{"date":"2026-04-23","l1":311600,"t1":10},{"date":"2026-04-24","l1":283300,"t1":5},{"date":"2026-04-25","l1":331400,"t1":8},{"date":"2026-04-26","l1":354000,"t1":7},{"date":"2026-04-27","l1":436300,"t1":7},{"date":"2026-04-28","l1":269100,"t1":6},{"date":"2026-04-29","l1":333000,"t1":6},{"date":"2026-04-30","l1":309900,"t1":5},{"date":"2026-05-02","l1":718320,"t1":7},{"date":"2026-05-03","l1":366000,"t1":8},{"date":"2026-05-04","l1":309000,"t1":8},{"date":"2026-05-05","l1":328300,"t1":9},{"date":"2026-05-06","l1":89000,"t1":2}];
+const L2=[{"date":"2026-01-02","l2":635000,"t2":17},{"date":"2026-01-03","l2":769500,"t2":17},{"date":"2026-01-04","l2":353500,"t2":10},{"date":"2026-01-05","l2":575000,"t2":15},{"date":"2026-01-06","l2":797500,"t2":21},{"date":"2026-01-07","l2":711500,"t2":17},{"date":"2026-01-08","l2":572500,"t2":16},{"date":"2026-01-09","l2":608500,"t2":15},{"date":"2026-01-10","l2":372000,"t2":10},{"date":"2026-01-11","l2":341000,"t2":9},{"date":"2026-01-12","l2":340740,"t2":14},{"date":"2026-01-13","l2":1120740,"t2":23},{"date":"2026-01-14","l2":563610,"t2":17},{"date":"2026-01-15","l2":797350,"t2":19},{"date":"2026-01-16","l2":484480,"t2":13},{"date":"2026-01-17","l2":1004000,"t2":26},{"date":"2026-01-18","l2":812000,"t2":19},{"date":"2026-01-19","l2":398000,"t2":8},{"date":"2026-01-20","l2":891870,"t2":17},{"date":"2026-01-21","l2":597740,"t2":12},{"date":"2026-01-22","l2":1022780,"t2":23},{"date":"2026-01-23","l2":402000,"t2":9},{"date":"2026-01-24","l2":845000,"t2":18},{"date":"2026-01-25","l2":618000,"t2":16},{"date":"2026-01-26","l2":766480,"t2":20},{"date":"2026-01-27","l2":581590,"t2":12},{"date":"2026-01-28","l2":690000,"t2":17},{"date":"2026-01-29","l2":572740,"t2":14},{"date":"2026-01-30","l2":574870,"t2":16},{"date":"2026-01-31","l2":748950,"t2":21},{"date":"2026-02-01","l2":629740,"t2":16},{"date":"2026-02-02","l2":871870,"t2":20},{"date":"2026-02-03","l2":531530,"t2":14},{"date":"2026-02-04","l2":734870,"t2":15},{"date":"2026-02-05","l2":502000,"t2":11},{"date":"2026-02-06","l2":539000,"t2":15},{"date":"2026-02-07","l2":593000,"t2":16},{"date":"2026-02-08","l2":393000,"t2":13},{"date":"2026-02-09","l2":741000,"t2":19},{"date":"2026-02-10","l2":617300,"t2":16},{"date":"2026-02-11","l2":645000,"t2":15},{"date":"2026-02-12","l2":759000,"t2":17},{"date":"2026-02-13","l2":230000,"t2":7},{"date":"2026-02-14","l2":871060,"t2":18},{"date":"2026-02-15","l2":768000,"t2":18},{"date":"2026-02-16","l2":829000,"t2":22},{"date":"2026-02-17","l2":614000,"t2":16},{"date":"2026-02-18","l2":706000,"t2":18},{"date":"2026-02-19","l2":414000,"t2":9},{"date":"2026-02-20","l2":579500,"t2":15},{"date":"2026-02-21","l2":590000,"t2":19},{"date":"2026-02-22","l2":420000,"t2":11},{"date":"2026-02-23","l2":494300,"t2":14},{"date":"2026-02-24","l2":420000,"t2":10},{"date":"2026-02-25","l2":886000,"t2":20},{"date":"2026-02-26","l2":719000,"t2":20},{"date":"2026-02-27","l2":433000,"t2":8},{"date":"2026-02-28","l2":798530,"t2":23},{"date":"2026-03-01","l2":941000,"t2":24},{"date":"2026-03-02","l2":976000,"t2":24},{"date":"2026-03-03","l2":732700,"t2":17},{"date":"2026-03-04","l2":462000,"t2":11},{"date":"2026-03-05","l2":451000,"t2":14},{"date":"2026-03-06","l2":619000,"t2":15},{"date":"2026-03-07","l2":530300,"t2":13},{"date":"2026-03-08","l2":840000,"t2":16},{"date":"2026-03-09","l2":695400,"t2":18},{"date":"2026-03-10","l2":567000,"t2":13},{"date":"2026-03-11","l2":695000,"t2":19},{"date":"2026-03-12","l2":564000,"t2":18},{"date":"2026-03-13","l2":408000,"t2":12},{"date":"2026-03-14","l2":1107000,"t2":26},{"date":"2026-03-15","l2":666000,"t2":13},{"date":"2026-03-16","l2":931000,"t2":25},{"date":"2026-03-17","l2":452000,"t2":10},{"date":"2026-03-18","l2":270000,"t2":8},{"date":"2026-03-19","l2":455000,"t2":13},{"date":"2026-03-20","l2":701000,"t2":14},{"date":"2026-03-21","l2":769300,"t2":20},{"date":"2026-03-22","l2":239000,"t2":8},{"date":"2026-03-23","l2":345000,"t2":9},{"date":"2026-03-24","l2":619000,"t2":15},{"date":"2026-03-25","l2":331000,"t2":9},{"date":"2026-03-26","l2":432000,"t2":11},{"date":"2026-03-27","l2":345000,"t2":9},{"date":"2026-03-28","l2":604000,"t2":13},{"date":"2026-03-29","l2":444000,"t2":12},{"date":"2026-03-30","l2":753000,"t2":17},{"date":"2026-03-31","l2":537000,"t2":16},{"date":"2026-04-01","l2":684000,"t2":17},{"date":"2026-04-02","l2":318000,"t2":8},{"date":"2026-04-04","l2":1174900,"t2":24},{"date":"2026-04-05","l2":324000,"t2":9},{"date":"2026-04-06","l2":590000,"t2":14},{"date":"2026-04-07","l2":746000,"t2":14},{"date":"2026-04-08","l2":443000,"t2":10},{"date":"2026-04-09","l2":585300,"t2":16},{"date":"2026-04-10","l2":407000,"t2":10},{"date":"2026-04-11","l2":847000,"t2":18},{"date":"2026-04-12","l2":661000,"t2":16},{"date":"2026-04-13","l2":575850,"t2":14},{"date":"2026-04-14","l2":707000,"t2":18},{"date":"2026-04-15","l2":504950,"t2":10},{"date":"2026-04-16","l2":724000,"t2":16},{"date":"2026-04-17","l2":651000,"t2":17},{"date":"2026-04-18","l2":773000,"t2":20},{"date":"2026-04-19","l2":249000,"t2":7},{"date":"2026-04-20","l2":472000,"t2":14},{"date":"2026-04-21","l2":479000,"t2":11},{"date":"2026-04-22","l2":537000,"t2":14},{"date":"2026-04-23","l2":602000,"t2":14},{"date":"2026-04-24","l2":251000,"t2":7},{"date":"2026-04-25","l2":826000,"t2":17},{"date":"2026-04-26","l2":745000,"t2":18},{"date":"2026-04-27","l2":823000,"t2":19},{"date":"2026-04-28","l2":518950,"t2":14},{"date":"2026-04-29","l2":679000,"t2":14},{"date":"2026-04-30","l2":548000,"t2":11},{"date":"2026-05-02","l2":1040000,"t2":22},{"date":"2026-05-03","l2":569000,"t2":14},{"date":"2026-05-04","l2":1190000,"t2":24},{"date":"2026-05-05","l2":733950,"t2":15},{"date":"2026-05-06","l2":477000,"t2":13}];
+
+const LCFG={
+  l2:{key:'l2',tx:'t2',open:'l2open',name:'La Candelaria',color:'#185FA5',threshold:600000},
+  l1:{key:'l1',tx:'t1',open:'l1open',name:'Fresh Laureles',color:'#0F6E56',threshold:350000},
+};
+
+function buildSeed(){
+  const m={};
+  L2.forEach(r=>{m[r.date]={date:r.date,l1:'',t1:'',l1open:false,l2:r.l2,t2:r.t2,l2open:true};});
+  L1.forEach(r=>{if(m[r.date]){m[r.date].l1=r.l1;m[r.date].t1=r.t1;m[r.date].l1open=true;}else m[r.date]={date:r.date,l1:r.l1,t1:r.t1,l1open:true,l2:'',t2:'',l2open:false};});
+  return Object.values(m).sort((a,b)=>a.date.localeCompare(b.date));
+}
+
+// ── ESTADO ──────────────────────────────────────────────────────────
+let state={tab:'dashboard',loc:'l2',N:60,chart:'tendencia',entries:[]};
+let chartInst=null;
+
+function loadEntries(){
+  try{
+    const stored=JSON.parse(localStorage.getItem('fl_entries')||'[]');
+    const seed=buildSeed();
+    const merged=Object.values([...seed,...stored].reduce((m,r)=>{
+      if(!m[r.date])m[r.date]={...r};
+      else{if(r.l1open){m[r.date].l1=r.l1;m[r.date].t1=r.t1;m[r.date].l1open=true;}if(r.l2open){m[r.date].l2=r.l2;m[r.date].t2=r.t2;m[r.date].l2open=true;}}
+      return m;
+    },{})).sort((a,b)=>a.date.localeCompare(b.date));
+    state.entries=merged;
+    localStorage.setItem('fl_entries',JSON.stringify(merged));
+  }catch(_){state.entries=buildSeed();}
+}
+function saveEntry(e){
+  const idx=state.entries.findIndex(r=>r.date===e.date);
+  if(idx>=0)state.entries[idx]={...e};else{state.entries.push(e);state.entries.sort((a,b)=>a.date.localeCompare(b.date));}
+  localStorage.setItem('fl_entries',JSON.stringify(state.entries));
+}
+function deleteEntry(date){
+  state.entries=state.entries.filter(r=>r.date!==date);
+  localStorage.setItem('fl_entries',JSON.stringify(state.entries));
+}
+
+// ── ALGORITMOS ──────────────────────────────────────────────────────
+const COP=v=>v==null?'—':'$'+Math.round(v).toLocaleString('es-CO');
+const pct=(a,b)=>b&&b>0?Math.round((a-b)/b*100):null;
+
+function activeDays(cfg){return state.entries.filter(r=>r[cfg.open]&&Number(r[cfg.key]||0)>0).sort((a,b)=>a.date.localeCompare(b.date));}
+function stats(days,cfg){if(!days.length)return null;const v=days.reduce((s,r)=>s+Number(r[cfg.key]||0),0),t=days.reduce((s,r)=>s+Number(r[cfg.tx]||0),0),d=days.length;return{desde:days[0].date,hasta:days[d-1].date,dias:d,ventaDia:Math.round(v/d),ticket:t?Math.round(v/t):0,svcsDay:Math.round(t/d*10)/10};}
+function linReg(vals){const n=vals.length;if(n<2)return{slope:0,r2:0};const mx=(n-1)/2,my=vals.reduce((a,v)=>a+v,0)/n;const num=vals.reduce((a,v,i)=>a+(i-mx)*(v-my),0);const denX=vals.reduce((a,_,i)=>a+(i-mx)**2,0);const denY=vals.reduce((a,v)=>a+(v-my)**2,0);return{slope:denX?num/denX:0,r2:(denX&&denY)?num**2/(denX*denY):0};}
+function movAvg(vals,n){if(!vals.length)return 0;return vals.slice(-Math.min(n,vals.length)).reduce((a,v)=>a+v,0)/Math.min(n,vals.length);}
+
+function calcTrend(all,cfg){
+  const vals=all.map(r=>Number(r[cfg.key]||0));if(vals.length<15)return null;
+  const ma15=movAvg(vals,15),ma60=movAvg(vals,Math.min(60,vals.length));
+  const{slope,r2}=linReg(vals.slice(-20));const cross=ma15>ma60;
+  let label,color,bg,desc;
+  if(cross&&slope>0){label='↑ EN ALZA';color=LCFG.l1.color;bg='#E1F5EE';desc=`MA15 (${COP(Math.round(ma15))}) sobre MA60 (${COP(Math.round(ma60))}), +${COP(Math.round(slope))}/día`;}
+  else if(!cross&&slope<0){label='↓ EN BAJA';color='#A32D2D';bg='#FCEBEB';desc=`MA15 (${COP(Math.round(ma15))}) bajo MA60 (${COP(Math.round(ma60))})`;}
+  else if(cross){label='→ LATERAL (perdiendo fuerza)';color='#7A5C00';bg='#FEF9E7';desc='MA15 arriba pero pendiente baja';}
+  else{label='→ LATERAL (ganando fuerza)';color='#7A5C00';bg='#FEF9E7';desc='Pendiente sube pero MA15 aún bajo MA60';}
+  return{label,color,bg,desc,ma15,ma60,slope:Math.round(slope),dir:slope>=0?'+':'',r2:Math.round(r2*100),cross};
+}
+function calcConsistencia(all,cfg){
+  const vals=all.map(r=>Number(r[cfg.key]||0));if(vals.length<5)return null;
+  const curr=vals.slice(-30),prev=vals.slice(-60,-30);
+  const avgC=curr.reduce((a,v)=>a+v,0)/curr.length;
+  const pctC=Math.round(curr.filter(v=>v>=avgC).length/curr.length*100);
+  let pctP=null;if(prev.length>=10){const avgP=prev.reduce((a,v)=>a+v,0)/prev.length;pctP=Math.round(prev.filter(v=>v>=avgP).length/prev.length*100);}
+  return{curr:pctC,prev:pctP,avg:Math.round(avgC)};
+}
+function calcRecuperacion(all,cfg){
+  const vals=all.map(r=>Number(r[cfg.key]||0));if(vals.length<10)return null;
+  const avg=vals.reduce((a,v)=>a+v,0)/vals.length;
+  const tiempos=[];let contando=false,dias=0;
+  for(const v of vals){if(v<avg*0.8){contando=true;dias=0;}else if(contando){dias++;if(v>=avg){tiempos.push(dias);contando=false;}}}
+  if(!tiempos.length)return null;
+  const hist=Math.round(tiempos.reduce((a,v)=>a+v,0)/tiempos.length*10)/10;
+  const rec=tiempos.slice(-5);
+  return{historico:hist,reciente:Math.round(rec.reduce((a,v)=>a+v,0)/rec.length*10)/10,mejorando:rec.reduce((a,v)=>a+v,0)/rec.length<=hist,n:tiempos.length};
+}
+function calcTVS(all,cfg){
+  const curr=all.slice(-30),prev=all.slice(-60,-30);if(curr.length<5)return null;
+  const sumVc=curr.reduce((a,r)=>a+Number(r[cfg.key]||0),0),sumTc=curr.reduce((a,r)=>a+Number(r[cfg.tx]||0),0);
+  const tickC=sumTc?Math.round(sumVc/sumTc):0,svcC=Math.round(sumTc/curr.length*10)/10;
+  let tickP=null,svcP=null,dT=null,dS=null;
+  if(prev.length>=5){const sumVp=prev.reduce((a,r)=>a+Number(r[cfg.key]||0),0),sumTp=prev.reduce((a,r)=>a+Number(r[cfg.tx]||0),0);tickP=sumTp?Math.round(sumVp/sumTp):0;svcP=Math.round(sumTp/prev.length*10)/10;dT=Math.round((tickC-tickP)/tickP*100);dS=Math.round((svcC-svcP)/svcP*100);}
+  let diag='',diagColor='var(--text2)';
+  if(dT!==null&&dS!==null){if(dT>0&&dS>0){diag='✓ Crecimiento real: sube ticket Y clientes';diagColor=LCFG.l1.color;}else if(dT>3&&dS<-2){diag='⚠ Solo sube precio — los clientes bajan';diagColor='#A32D2D';}else if(dT<-2&&dS>0){diag='Más clientes pero pagando menos';diagColor='#7A5C00';}else{diag='Estable';}}
+  return{tickC,tickP,svcC,svcP,dT,dS,diag,diagColor};
+}
+function calcDiasBuenos(all,cfg){
+  if(all.length<14)return null;const thresh=cfg.threshold,byWeek={};
+  all.forEach(r=>{const d=new Date(r.date+'T12:00:00'),day=d.getDay();const mon=new Date(d);mon.setDate(d.getDate()-(day===0?6:day-1));const wk=mon.toISOString().slice(0,10);if(!byWeek[wk])byWeek[wk]={buenos:0,total:0,wk:wk.slice(5)};byWeek[wk].total++;if(Number(r[cfg.key]||0)>=thresh)byWeek[wk].buenos++;});
+  const weeks=Object.keys(byWeek).sort();const last4=weeks.slice(-4),prev4=weeks.slice(-8,-4);
+  const avgC=last4.length?last4.reduce((a,w)=>a+byWeek[w].buenos,0)/last4.length:0;
+  const avgP=prev4.length?prev4.reduce((a,w)=>a+byWeek[w].buenos,0)/prev4.length:0;
+  return{currAvg:Math.round(avgC*10)/10,prevAvg:Math.round(avgP*10)/10,mejorando:avgC>avgP,weeks:weeks.slice(-8).map(w=>byWeek[w])};
+}
+
+// ── HTML HELPERS ─────────────────────────────────────────────────────
+function tag(t,cls,content,attrs=''){return `<${t} class="${cls}" ${attrs}>${content}</${t}>`;}
+function deltaSpan(curr,prev){if(prev==null||curr==null)return'';const p=pct(curr,prev);if(p===null)return'';const up=p>=0;return `<span class="delta ${up?'up':'dn'}">${up?'▲':'▼'} ${Math.abs(p)}%</span>`;}
+
+// ── RENDER ───────────────────────────────────────────────────────────
+function render(){
+  document.getElementById('app-content').innerHTML=buildContent();
+  if(state.tab==='dashboard')renderChart();
+}
+
+function buildContent(){
+  const tabs=`<div class="tabs">
+    ${[['dashboard','Dashboard'],['ingresar','Ingresar ventas'],['historial','Historial']].map(([id,lbl])=>`<button class="tab ${state.tab===id?'active':''}" onclick="setTab('${id}')">${lbl}</button>`).join('')}
+  </div>`;
+
+  let content='';
+  if(state.tab==='dashboard') content=buildDashboard();
+  else if(state.tab==='ingresar') content=buildForm();
+  else content=buildHistorial();
+
+  return tabs+content;
+}
+
+function buildDashboard(){
+  const cfg=LCFG[state.loc];
+  const ac=cfg.color;
+  const all=activeDays(cfg);
+  const N=state.N;
+  const curr=stats(all.slice(-N),cfg);
+  const prev=stats(all.slice(-N*2,-N),cfg);
+  const trend=calcTrend(all,cfg);
+  const consist=calcConsistencia(all,cfg);
+  const recup=calcRecuperacion(all,cfg);
+  const tvs=calcTVS(all,cfg);
+  const db=calcDiasBuenos(all,cfg);
+
+  // Mayo acumulado
+  const mayoDays=all.filter(r=>r.date.startsWith('2026-05'));
+  const mayoTotal=mayoDays.reduce((s,r)=>s+Number(r[cfg.key]||0),0);
+  const mayoDias=mayoDays.length;
+
+  const controls=`<div class="controls">
+    <span style="font-size:11px;color:var(--text2)">Ventana:</span>
+    ${[15,30,60].map(w=>`<button class="wbtn ${N===w?'active':''}" style="${N===w?`background:${ac};border-color:${ac}`:''}" onclick="setN(${w})">${w}d</button>`).join('')}
+    <div class="sep"></div>
+    ${Object.entries(LCFG).map(([k,c])=>`<button class="loc-btn ${state.loc===k?'active':''}" style="${state.loc===k?`background:${c.color};border-color:${c.color}`:''}" onclick="setLoc('${k}')">${c.name}</button>`).join('')}
+  </div>`;
+
+  // Mayo banner
+  const mayo=mayoDias>0?`<div class="mayo-banner">
+    <div class="mayo-item"><div class="mayo-sub">Mayo acumulado</div><div class="mayo-val" style="color:${ac}">${COP(mayoTotal)}</div></div>
+    <div class="mayo-item"><div class="mayo-sub">Días activos</div><div class="mayo-val">${mayoDias}</div></div>
+    <div class="mayo-item"><div class="mayo-sub">Promedio/día</div><div class="mayo-val">${mayoDias>0?COP(Math.round(mayoTotal/mayoDias)):'—'}</div></div>
+  </div>`:'';
+
+  // Tendencia
+  const trendHtml=trend?`<div class="trend-banner" style="background:${trend.bg};border-color:${trend.color}">
+    <div class="trend-label" style="color:${trend.color}">${trend.label}</div>
+    <div class="trend-desc" style="color:${trend.color}">${trend.desc}</div>
+  </div>
+  <div class="ma-row">
+    ${[['MA 15d',COP(Math.round(trend.ma15)),trend.cross?LCFG.l1.color:'#A32D2D','ma15'],
+       ['MA 60d',COP(Math.round(trend.ma60)),'var(--text)','ma60'],
+       ['Pendiente/día',trend.dir+'$'+Math.abs(trend.slope).toLocaleString('es-CO'),trend.slope>=0?LCFG.l1.color:'#A32D2D','pend'],
+       ['Fuerza (R²)',trend.r2+'%','var(--text)','r2']
+    ].map(([l,v,c,k])=>`<div class="ma-card"><div class="ma-label">${l}<button class="itip" onclick="showTip('${k}')">ⓘ</button></div><div class="ma-val" style="color:${c}">${v}</div></div>`).join('')}
+  </div>`:'';
+
+  // Métricas
+  const metricHtml=curr?`
+  <div class="period-bar">
+    <div class="pill"><span class="pill-dot" style="background:${ac}"></span><span class="pill-label">Actual (${N}d)</span><span class="pill-range">${curr.desde.slice(5)} → ${curr.hasta.slice(5)}</span><span class="pill-dias">${curr.dias}d</span></div>
+    ${prev?`<div class="pill"><span class="pill-dot" style="background:var(--text3)"></span><span class="pill-label">Anterior (${N}d)</span><span class="pill-range">${prev.desde.slice(5)} → ${prev.hasta.slice(5)}</span><span class="pill-dias">${prev.dias}d</span></div>`:''}
+  </div>
+  <div class="metrics">
+    ${[['Ventas / día',COP(curr.ventaDia),prev?.ventaDia],['Ticket promedio',COP(curr.ticket),prev?.ticket],['Servicios / día',String(curr.svcsDay),prev?.svcsDay]].map(([l,v,p])=>`
+    <div class="metric" style="border-top-color:${ac}"><div class="metric-label">${l}</div><div class="metric-value">${v}</div>${p!=null?`<div class="metric-prev">Ant.: ${typeof p==='number'&&l.includes('$')?COP(p):String(p)}${deltaSpan(parseFloat(v.replace(/[^0-9]/g,'')),p)}</div>`:''}</div>`).join('')}
+  </div>`:'';
+
+  // Consistencia
+  const consistHtml=consist?`<div class="divider"></div>
+  <div class="section-title">② Consistencia · últimos 30d vs 30 anteriores</div>
+  <div class="kpi-grid">
+    <div class="kpi" style="border-top-color:${consist.curr>=50?LCFG.l1.color:'#A32D2D'}"><div class="kpi-label">Días sobre su propio promedio (actual)<button class="itip" onclick="showTip('consist')">ⓘ</button></div><div class="kpi-value big" style="color:${consist.curr>=50?LCFG.l1.color:'#A32D2D'}">${consist.curr}%</div><div class="kpi-sub">Promedio: ${COP(consist.avg)}</div></div>
+    ${consist.prev!=null?`<div class="kpi" style="border-top-color:${consist.curr>=consist.prev?LCFG.l1.color:'#A32D2D'}"><div class="kpi-label">Período anterior (30d previos)</div><div class="kpi-value" style="color:${consist.curr>=consist.prev?LCFG.l1.color:'#A32D2D'}">${consist.prev}%</div><div class="kpi-sub">${consist.curr>consist.prev?'↑ Mejorando':'↓ Menos consistente'}</div></div>`:''}
+  </div>`:'';
+
+  // Recuperación
+  const recupHtml=recup?`<div class="divider"></div>
+  <div class="section-title">③ Recuperación tras días malos</div>
+  <div class="kpi-grid">
+    <div class="kpi" style="border-top-color:var(--text2)"><div class="kpi-label">Recuperación histórica<button class="itip" onclick="showTip('recup_hist')">ⓘ</button></div><div class="kpi-value">${recup.historico}d</div><div class="kpi-sub">${recup.n} eventos</div></div>
+    <div class="kpi" style="border-top-color:${recup.mejorando?LCFG.l1.color:'#A32D2D'}"><div class="kpi-label">Últimas 5 recuperaciones<button class="itip" onclick="showTip('recup_rec')">ⓘ</button></div><div class="kpi-value" style="color:${recup.mejorando?LCFG.l1.color:'#A32D2D'}">${recup.reciente}d</div><div class="kpi-sub">${recup.mejorando?'↑ Más rápido':'↓ Más lento'}</div></div>
+  </div>`:'';
+
+  // TVS
+  const tvsHtml=tvs?`<div class="divider"></div>
+  <div class="section-title">④ Ticket vs servicios · últimos 30d vs 30 anteriores</div>
+  <div class="diag" style="background:${tvs.diagColor===LCFG.l1.color?'#E1F5EE':tvs.diagColor==='#A32D2D'?'#FCEBEB':'var(--bg2)'};color:${tvs.diagColor}">${tvs.diag}</div>
+  <div class="kpi-grid">
+    <div class="kpi" style="border-top-color:${tvs.dT!=null?(tvs.dT>=0?LCFG.l1.color:'#A32D2D'):'var(--text2)'}"><div class="kpi-label">Ticket actual<button class="itip" onclick="showTip('ticket')">ⓘ</button></div><div class="kpi-value">${COP(tvs.tickC)}</div><div class="kpi-sub">${tvs.tickP?'Ant.: '+COP(tvs.tickP)+(tvs.dT!=null?' ('+(tvs.dT>=0?'+':'')+tvs.dT+'%)':''):'—'}</div></div>
+    <div class="kpi" style="border-top-color:${tvs.dS!=null?(tvs.dS>=0?LCFG.l1.color:'#A32D2D'):'var(--text2)'}"><div class="kpi-label">Servicios / día<button class="itip" onclick="showTip('servicios')">ⓘ</button></div><div class="kpi-value">${tvs.svcC}</div><div class="kpi-sub">${tvs.svcP?'Ant.: '+tvs.svcP+(tvs.dS!=null?' ('+(tvs.dS>=0?'+':'')+tvs.dS+'%)':''):'—'}</div></div>
+  </div>`:'';
+
+  // Días buenos
+  const dbHtml=db?`<div class="divider"></div>
+  <div class="section-title">⑤ Días buenos por semana · umbral ${COP(cfg.threshold)}</div>
+  <div class="kpi-grid">
+    <div class="kpi" style="border-top-color:${db.mejorando?LCFG.l1.color:'#A32D2D'}"><div class="kpi-label">Últimas 4 semanas<button class="itip" onclick="showTip('diasbuenos')">ⓘ</button></div><div class="kpi-value big" style="color:${db.mejorando?LCFG.l1.color:'#A32D2D'}">${db.currAvg} d/sem</div><div class="kpi-sub">Días sobre el umbral</div></div>
+    <div class="kpi" style="border-top-color:${db.mejorando?LCFG.l1.color:'#A32D2D'}"><div class="kpi-label">4 semanas anteriores</div><div class="kpi-value" style="color:${db.mejorando?LCFG.l1.color:'#A32D2D'}">${db.prevAvg} d/sem</div><div class="kpi-sub">${db.mejorando?'↑ Más días buenos':'↓ Menos días buenos'}</div></div>
+  </div>`:'';
+
+  // Gráfica
+  const chartTabs=[['tendencia','Tendencia'],['consistencia','Consist.'],['diaadia','Día a día'],['diasbuenos','Días buenos'],['mes','Por mes']];
+  const chartHtml=`<div class="chart-card">
+    <div class="chart-header">
+      <div class="chart-title">Gráfica</div>
+      <div class="chart-tabs">${chartTabs.map(([id,lbl])=>`<button class="ctab ${state.chart===id?'active':''}" onclick="setChart('${id}')">${lbl}</button>`).join('')}</div>
+    </div>
+    ${state.chart==='tendencia'?`<div class="chart-legend"><span class="legend-item"><span class="legend-dot" style="background:${ac}"></span>MA 15d</span><span class="legend-item"><span class="legend-line" style="background:#B4B2A9"></span>MA 60d</span></div>`:''}
+    ${state.chart==='consistencia'?`<div style="font-size:11px;color:var(--text2);margin-bottom:8px">Azul = días sobre el promedio · Rojo = días bajo</div>`:''}
+    <div class="chart-wrap"><canvas id="main-chart"></canvas></div>
+  </div>`;
+
+  return controls+mayo+`<div class="section-title" style="margin-top:4px">① Tendencia · medias móviles</div>`+trendHtml+`<div class="divider"></div><div class="section-title">Métricas · ${N} días activos</div>`+metricHtml+consistHtml+recupHtml+tvsHtml+dbHtml+chartHtml;
+}
+
+function renderChart(){
+  const cfg=LCFG[state.loc];
+  const ac=cfg.color;
+  const all=activeDays(cfg);
+  const N=state.N;
+  const canvas=document.getElementById('main-chart');
+  if(!canvas)return;
+  if(chartInst){chartInst.destroy();chartInst=null;}
+  const vals=all.map(r=>Number(r[cfg.key]||0));
+  const labels=all.map(r=>r.date.slice(5));
+
+  let data,options,type='line';
+  const baseOpts={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:10},color:'#888',maxTicksLimit:10,autoSkip:true}},y:{ticks:{font:{size:10},color:'#888',callback:v=>'$'+(v>=1000000?(v/1000000).toFixed(1)+'M':(v/1000).toFixed(0)+'k')}}}};
+
+  if(state.chart==='tendencia'){
+    const ma15=vals.map((_,i)=>{const w=vals.slice(Math.max(0,i-14),i+1);return Math.round(w.reduce((a,v)=>a+v,0)/w.length);});
+    const ma60=vals.map((_,i)=>{const w=vals.slice(Math.max(0,i-59),i+1);return Math.round(w.reduce((a,v)=>a+v,0)/w.length);});
+    data={labels,datasets:[{data:vals,borderColor:ac+'44',backgroundColor:'transparent',tension:.2,pointRadius:0,borderWidth:1,spanGaps:true},{data:ma15,borderColor:ac,backgroundColor:'transparent',tension:.4,pointRadius:0,borderWidth:2.5,spanGaps:true},{data:ma60,borderColor:'#B4B2A9',backgroundColor:'transparent',tension:.4,pointRadius:0,borderWidth:2,borderDash:[5,3],spanGaps:true}]};
+    options=baseOpts;
+  } else if(state.chart==='consistencia'){
+    const w30=vals.slice(-30),avg=w30.reduce((a,v)=>a+v,0)/w30.length;
+    type='bar';data={labels:all.slice(-30).map(r=>r.date.slice(5)),datasets:[{data:w30,backgroundColor:w30.map(v=>v>=avg?ac+'CC':'#E24B4A88')}]};
+    options={...baseOpts};
+  } else if(state.chart==='diaadia'){
+    const cw=all.slice(-N),pw=all.slice(-N*2,-N);const len=Math.max(cw.length,pw.length);
+    data={labels:Array.from({length:len},(_,i)=>'D'+(i+1)),datasets:[{data:Array.from({length:len},(_,i)=>i<cw.length?Number(cw[i][cfg.key]||0):null),borderColor:ac,backgroundColor:'transparent',tension:.3,pointRadius:0,borderWidth:2,spanGaps:true},{data:Array.from({length:len},(_,i)=>i<pw.length?Number(pw[i][cfg.key]||0):null),borderColor:'#B4B2A9',backgroundColor:'transparent',tension:.3,pointRadius:0,borderWidth:1.5,borderDash:[4,3],spanGaps:true}]};
+    options=baseOpts;
+  } else if(state.chart==='diasbuenos'){
+    const db=calcDiasBuenos(all,cfg);if(!db)return;
+    type='bar';data={labels:db.weeks.map(w=>w.wk),datasets:[{label:'Días buenos',data:db.weeks.map(w=>w.buenos),backgroundColor:ac+'CC',borderRadius:3},{label:'Días normales',data:db.weeks.map(w=>w.total-w.buenos),backgroundColor:'#88888822',borderRadius:3}]};
+    options={responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{font:{size:11},boxWidth:12}}},scales:{x:{stacked:true,ticks:{font:{size:10},color:'#888'}},y:{stacked:true,max:7,ticks:{font:{size:10},color:'#888',stepSize:1}}}};
+  } else {
+    const map={};all.forEach(r=>{const m=r.date.slice(0,7);if(!map[m])map[m]=0;map[m]+=Number(r[cfg.key]||0);});const ms=Object.keys(map).sort();
+    type='bar';data={labels:ms,datasets:[{data:ms.map(m=>map[m]),backgroundColor:ac+'CC'}]};
+    options={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:11},color:'#888',autoSkip:false,maxRotation:0}},y:{ticks:{font:{size:11},color:'#888',callback:v=>'$'+(v/1000000).toFixed(1)+'M'}}}};
+  }
+  chartInst=new Chart(canvas,{type,data,options});
+}
+
+function buildForm(){
+  const today=new Date().toISOString().slice(0,10);
+  return `<div class="form-card">
+    <div style="margin-bottom:18px">
+      <label class="form-label">Fecha</label>
+      <input class="form-input" type="date" id="f-date" value="${today}" onchange="checkExisting()">
+      <div class="form-note" id="f-existing" style="margin-top:5px"></div>
+    </div>
+    ${Object.entries(LCFG).map(([k,c])=>`
+    <div class="form-section" id="fs-${k}">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <span style="font-weight:500;font-size:14px;color:${c.color}">${c.name}</span>
+        <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);cursor:pointer">
+          <input type="checkbox" id="f-${k}-open" checked onchange="toggleLocal('${k}')"> Abierto
+        </label>
+      </div>
+      <div class="form-row">
+        <div><label class="form-label">Ventas ($)</label><input class="form-input" type="number" id="f-${k}-v" placeholder="0" oninput="calcTicket('${k}')"></div>
+        <div><label class="form-label">N° servicios</label><input class="form-input" type="number" id="f-${k}-t" placeholder="0" oninput="calcTicket('${k}')"></div>
+      </div>
+      <div class="form-ticket" id="ft-${k}" style="display:none;background:${c.color}22;color:${c.color}"></div>
+    </div>`).join('')}
+    <button class="submit-btn" id="submit-btn" onclick="submitForm()">Guardar ventas del día</button>
+  </div>`;
+}
+
+function checkExisting(){
+  const date=document.getElementById('f-date').value;
+  const ex=state.entries.find(r=>r.date===date);
+  const note=document.getElementById('f-existing');
+  if(ex){note.textContent='Ya existe registro — se actualizará.';if(ex.l2open){document.getElementById('f-l2-v').value=ex.l2||'';document.getElementById('f-l2-t').value=ex.t2||'';}if(ex.l1open){document.getElementById('f-l1-v').value=ex.l1||'';document.getElementById('f-l1-t').value=ex.t1||'';}}
+  else note.textContent='';
+}
+function toggleLocal(k){const open=document.getElementById(`f-${k}-open`).checked;['v','t'].forEach(f=>document.getElementById(`f-${k}-${f}`).disabled=!open);}
+function calcTicket(k){const v=Number(document.getElementById(`f-${k}-v`).value),t=Number(document.getElementById(`f-${k}-t`).value);const el=document.getElementById(`ft-${k}`);if(v>0&&t>0){el.style.display='block';el.textContent='Ticket: '+COP(Math.round(v/t));}else el.style.display='none';}
+function submitForm(){
+  const date=document.getElementById('f-date').value;
+  const l2open=document.getElementById('f-l2-open').checked;
+  const l1open=document.getElementById('f-l1-open').checked;
+  const entry={date,l2open,l2:l2open?Number(document.getElementById('f-l2-v').value)||0:'',t2:l2open?Number(document.getElementById('f-l2-t').value)||0:'',l1open,l1:l1open?Number(document.getElementById('f-l1-v').value)||0:'',t1:l1open?Number(document.getElementById('f-l1-t').value)||0:''};
+  saveEntry(entry);
+  const btn=document.getElementById('submit-btn');btn.textContent='✓ Guardado';btn.classList.add('ok');
+  setTimeout(()=>{btn.textContent='Guardar ventas del día';btn.classList.remove('ok');},2500);
+}
+
+function buildHistorial(){
+  const sorted=[...state.entries].sort((a,b)=>b.date.localeCompare(a.date));
+  const rows=sorted.map(r=>{
+    const tk2=Number(r.t2)>0?Math.round(Number(r.l2)/Number(r.t2)):null;
+    const tk1=Number(r.t1)>0?Math.round(Number(r.l1)/Number(r.t1)):null;
+    return `<tr>
+      <td style="color:var(--text2);white-space:nowrap">${r.date}</td>
+      <td style="color:${r.l2open?LCFG.l2.color:'var(--text2)'};font-weight:${r.l2open?500:400}">${r.l2open?COP(Number(r.l2)):'—'}</td>
+      <td style="color:${r.l2open?LCFG.l2.color:'var(--text2)'}">${r.l2open&&tk2?COP(tk2):'—'}</td>
+      <td style="color:${r.l1open?LCFG.l1.color:'var(--text2)'};font-weight:${r.l1open?500:400}">${r.l1open?COP(Number(r.l1)):'—'}</td>
+      <td style="color:${r.l1open?LCFG.l1.color:'var(--text2)'}">${r.l1open&&tk1?COP(tk1):'—'}</td>
+      <td><button onclick="delEntry('${r.date}')" style="font-size:11px;color:var(--text3);background:none;border:none;cursor:pointer">✕</button></td>
+    </tr>`;
+  }).join('');
+  return `<div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Candelaria</th><th>Ticket</th><th>Laureles</th><th>Ticket</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+
+function delEntry(date){if(confirm('¿Eliminar el registro del '+date+'?')){deleteEntry(date);render();}}
+
+// ── SETTERS ──────────────────────────────────────────────────────────
+function setTab(t){state.tab=t;render();}
+function setLoc(l){state.loc=l;render();}
+function setN(n){state.N=n;render();}
+function setChart(c){state.chart=c;render();renderChart();}
+
+function initApp(){loadEntries();render();}
+</script>
+</body>
+</html>
