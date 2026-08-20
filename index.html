@@ -353,8 +353,12 @@ function buildDashboard(){
   const tvs=calcTVS(all,cfg);
   const db=calcDiasBuenos(all,cfg);
 
-  // Mayo acumulado
-  const mayoDays=all.filter(r=>r.date.startsWith('2026-05'));
+  // Mes actual acumulado
+  const now=new Date();
+  const mesPrefix=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+  const MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const mesNombre=MESES[now.getMonth()];
+  const mayoDays=all.filter(r=>r.date.startsWith(mesPrefix));
   const mayoTotal=mayoDays.reduce((s,r)=>s+Number(r[cfg.key]||0),0);
   const mayoDias=mayoDays.length;
 
@@ -365,9 +369,9 @@ function buildDashboard(){
     ${Object.entries(LCFG).map(([k,c])=>`<button class="loc-btn ${state.loc===k?'active':''}" style="${state.loc===k?`background:${c.color};border-color:${c.color}`:''}" onclick="setLoc('${k}')">${c.name}</button>`).join('')}
   </div>`;
 
-  // Mayo banner
+  // Mes actual banner
   const mayo=mayoDias>0?`<div class="mayo-banner">
-    <div class="mayo-item"><div class="mayo-sub">Mayo acumulado</div><div class="mayo-val" style="color:${ac}">${COP(mayoTotal)}</div></div>
+    <div class="mayo-item"><div class="mayo-sub">${mesNombre} acumulado</div><div class="mayo-val" style="color:${ac}">${COP(mayoTotal)}</div></div>
     <div class="mayo-item"><div class="mayo-sub">Días activos</div><div class="mayo-val">${mayoDias}</div></div>
     <div class="mayo-item"><div class="mayo-sub">Promedio/día</div><div class="mayo-val">${mayoDias>0?COP(Math.round(mayoTotal/mayoDias)):'—'}</div></div>
   </div>`:'';
